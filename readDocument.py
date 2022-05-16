@@ -2,7 +2,7 @@ from itertools import count
 import os
 import pdb
 
-path =r"/home/lucas/Documentos/ORI/Texts/"
+path =r"/home/lucas/Documents/Projects1/ORI/Texts/"
 os.chdir(path)
 
 
