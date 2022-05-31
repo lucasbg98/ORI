@@ -2,9 +2,11 @@ from itertools import count
 import os
 import pdb
 from string import punctuation
+import numpy as np
+
 
 current_directory = os.getcwd()
-path =r"/home/lucas/Documents/Projects/ORI/Texts/"
+path = current_directory +"/Texts/"
 os.chdir(path)
 
 
@@ -22,7 +24,7 @@ def tokenize(file):
 #funcao que remove stopwords do documento
 def remove_stopwords(document):
     tokens_filtered= [word for word in document if not word in stopwords ]
-    return (" ").join(tokens_filtered)
+    return tokens_filtered
 
 #funcao que remove pontuacao do documento
 def remove_punctuation(document):
@@ -37,17 +39,61 @@ def remove_punctuation(document):
 
 #funcao filtro que realiza a remocao das stopwords e pontuacoes do documento e ja o retorna todo em letra minuscula
 def filter(document):
-    filter = remove_stopwords(document)
-    filter = remove_punctuation(document)
     
     output = []
     
-    for word in filter:
+    for word in document:
         output.append(word.lower())
-        
-    return output
+      
+    filter = remove_punctuation(output)
+    filter = remove_stopwords(filter)
     
+    return filter
 
+#funcao que realiza a criação da matriz termo-documento    
+def makeMatrix(document):
+    
+    terms = []
+    
+    #separo todas as palavras individuais do documento em um novo vetor
+    for doc in document:
+        for word in doc:
+            if word not in terms:
+                terms.append(word)
+    
+    #crio uma nova matriz de zeros do tipo object
+    term_document = np.zeros( (len(terms)+1 , len(document)+1), dtype=np.object_)
+    
+    #i controla as linhas da matriz, enquanto y controla as colunas da matriz para preencher a primeira linha com os nomes dos documentos
+    i = 1
+    y = 0
+    for word in terms:
+        while y < 6:
+            if y == 0:
+                term_document[0][y] = 'Documents: '
+                y+=1
+            term_document[0][y] = "Doc "+ str(y)
+            y+=1
+        term_document[i][0] = word
+        
+        i+=1
+    
+    #for que realiza a filtragem termo-documento de cada palavra dentro de cada documento
+    y=1
+    for word in document:
+        i = 1
+        for letter in word:
+            x = 1
+            while x < len(terms)+1:
+                if letter == term_document[x][0]:
+                    term_document[x][y] += 1
+                x+=1
+            i +=1    
+        y+=1
+        
+        
+    print(term_document)
+                     
 
 #funcao que le diversos documentos de um determinado diretorio e ja as tokeniza totalmente (removendo stopwords, pontuacoes e deixando em letra minuscula)
 def readCollection():
@@ -85,7 +131,6 @@ def searchTerm(file, term):
     for word in output:
         str_match = [s for s in word if term in s];
         count = len(str_match)
-        
         print("Documento", i,":" ,word,"\n")
         print("O termo", term, "foi apareceu ", count, "vez(es)\n\n")
         i+=1
@@ -96,19 +141,21 @@ stopwords = readDoc(current_directory + "/Filters/stopwords_ptbr.txt")
 stopwords = tokenize(stopwords)
     
 punctuation = readDoc(current_directory +"/Filters/punctuation.txt")
+#punctuation = tokenize(punctuation)
 
 def main():
     
     #newFile recebe uma lista dos documentos do diretorio ja totalmente tokenizados (sem stopword, pontuacao e tudo em minusculo)
     newFile = readCollection()
-
-    print("Digite o termo que deseja procurar dentro da colecao de documentos")
-    term = input()
     
-    searchTerm(newFile, term) 
+    x=1
+    for doc in newFile:
+        print("Documento", x, ":", doc)
+        x+=1
+    print("\n")
+    
+    makeMatrix(newFile) 
 
 
 if __name__ == "__main__":
     main()
-
-#teste
